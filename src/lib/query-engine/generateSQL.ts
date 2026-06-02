@@ -46,7 +46,11 @@ function parseNode(node: QueryNode): string {
     return parseCondition(node);
   }
 
-  const children = node.children.map(parseNode);
+  const children = node.children.map(parseNode).filter(Boolean);
+
+  if (children.length === 0) {
+    return "";
+  }
 
   return `(
  ${children.join(` ${node.logic} `)}

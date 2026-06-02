@@ -12,6 +12,8 @@ import ValueInput from "./ValueInput";
 
 import { OPERATORS } from "../../src/lib/schema/operators";
 
+import { removeNode } from "../../src/lib/traversal/removeNode";
+
 interface Props {
   node: ConditionType;
 }
@@ -34,7 +36,7 @@ export default function ConditionNode({ node }: Props) {
   }
 
   return (
-    <div className="flex gap-2 border p-3 rounded">
+    <div className="flex flex-wrap gap-2 items-center rounded border p-3">
       <select
         value={node.field}
         onChange={(e) =>
@@ -82,6 +84,13 @@ export default function ConditionNode({ node }: Props) {
           })
         }
       />
+      <button
+        onClick={() => {
+          updateRoot((root) => removeNode(root, node.id));
+        }}
+      >
+        Remove
+      </button>
     </div>
   );
 }
