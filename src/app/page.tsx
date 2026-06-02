@@ -1,16 +1,13 @@
-import QueryBuilder
-from "../../components/query-builder/QueryBuilder";
+import QueryBuilder from "../../components/query-builder/QueryBuilder";
 
-export default function Home(){
+import QueryPreview from "../../components/query-preview/QueryPreview";
 
- return(
+export default function Home() {
+  return (
+    <div className="p-8 space-y-10">
+      <QueryBuilder />
 
-<div className="p-10">
-
-<QueryBuilder/>
-
-</div>
-
-)
-
+      <QueryPreview />
+    </div>
+  );
 }
