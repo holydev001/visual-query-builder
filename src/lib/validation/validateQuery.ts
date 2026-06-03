@@ -1,5 +1,6 @@
 import { GroupNode, QueryNode, ConditionNode } from "../../types/query";
-import { userSchema } from "../../mock/schema";
+import { getSchema } from "../../mock/schema";
+import { DatasetType } from "../../store/query-store";
 import { OPERATORS } from "../schema/operators";
 
 export interface ValidationError {
@@ -7,10 +8,14 @@ export interface ValidationError {
   message: string;
 }
 
-function validateCondition(node: ConditionNode): ValidationError[] {
+function validateCondition(
+  node: ConditionNode,
+  dataset: DatasetType,
+): ValidationError[] {
   const errors: ValidationError[] = [];
 
-  const field = userSchema.find((item) => item.name === node.field);
+  const schema = getSchema(dataset);
+  const field = schema.find((item) => item.name === node.field);
 
   if (!node.field) {
     errors.push({ nodeId: node.id, message: "Field is required" });
@@ -40,9 +45,9 @@ function validateCondition(node: ConditionNode): ValidationError[] {
   return errors;
 }
 
-function walk(node: QueryNode): ValidationError[] {
+function walk(node: QueryNode, dataset: DatasetType): ValidationError[] {
   if (node.type === "condition") {
-    return validateCondition(node);
+    return validateCondition(node, dataset);
   }
 
   const errors: ValidationError[] = [];
@@ -55,12 +60,15 @@ function walk(node: QueryNode): ValidationError[] {
   }
 
   node.children.forEach((child) => {
-    errors.push(...walk(child));
+    errors.push(...walk(child, dataset));
   });
 
   return errors;
 }
 
-export function validateQuery(root: GroupNode): ValidationError[] {
-  return walk(root);
+export function validateQuery(
+  root: GroupNode,
+  dataset: DatasetType = "users",
+): ValidationError[] {
+  return walk(root, dataset);
 }
