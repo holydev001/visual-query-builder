@@ -19,33 +19,38 @@ export default function QueryResults() {
       </h2>
 
       <div className="border rounded">
-        <table className="w-full">
-          <thead>
-            <tr>
-              <th>ID</th>
+        {results.length === 0 && (
+          <p className="rounded border p-4">No matching results found.</p>
+        )}
+        {results.length > 0 && (
+          <table className="w-full">
+            <thead>
+              <tr>
+                <th>ID</th>
 
-              <th>Name</th>
+                <th>Name</th>
 
-              <th>Age</th>
+                <th>Age</th>
 
-              <th>Status</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {results.map((user) => (
-              <tr key={user.id}>
-                <td>{user.id}</td>
-
-                <td>{user.name}</td>
-
-                <td>{user.age}</td>
-
-                <td>{user.status}</td>
+                <th>Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {results.map((user) => (
+                <tr key={user.id}>
+                  <td>{user.id}</td>
+
+                  <td>{user.name}</td>
+
+                  <td>{user.age}</td>
+
+                  <td>{user.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

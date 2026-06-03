@@ -13,6 +13,12 @@ export default function QueryControls() {
     presets,
 
     loadPreset,
+
+    clearQuery,
+
+    undo,
+
+    redo,
   } = useQueryStore();
 
   function exportJSON() {
@@ -44,6 +50,12 @@ export default function QueryControls() {
       <button onClick={importJSON}>Import</button>
 
       <button onClick={savePreset}>Save Preset</button>
+
+      <button onClick={undo}>Undo</button>
+
+      <button onClick={redo}>Redo</button>
+
+      <button onClick={clearQuery}>Clear</button>
 
       <select onChange={(e) => loadPreset(Number(e.target.value))}>
         <option>Presets</option>
