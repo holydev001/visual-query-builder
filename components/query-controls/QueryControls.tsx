@@ -1,71 +1,59 @@
 "use client";
 
+import { Download, Upload, Save, Undo2, Redo2, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { useQueryStore } from "../../src/store/query-store";
+import QueryJsonModal from "./QueryJsonModal";
+import ThemedSelect from "@/components/shared/ThemedSelect";
 
 export default function QueryControls() {
-  const {
-    root,
+  const { savePreset, presets, loadPreset, clearQuery, undo, redo } =
+    useQueryStore();
 
-    setRoot,
+  const [modalMode, setModalMode] = useState<"import" | "export" | null>(null);
 
-    savePreset,
-
-    presets,
-
-    loadPreset,
-
-    clearQuery,
-
-    undo,
-
-    redo,
-  } = useQueryStore();
-
-  function exportJSON() {
-    const data = JSON.stringify(root, null, 2);
-
-    navigator.clipboard.writeText(data);
-
-    alert("Copied");
-  }
-
-  function importJSON() {
-    const input = prompt("Paste JSON");
-
-    if (!input) return;
-
-    try {
-      const parsed = JSON.parse(input);
-
-      setRoot(parsed);
-    } catch {
-      alert("Invalid JSON");
-    }
-  }
+  const buttonClass =
+    "inline-flex items-center justify-center gap-2 border border-black/10 bg-white px-2 py-2 text-sm font-medium text-black transition hover:bg-[#f8faf8] sm:px-3 dark:border-white/10 dark:bg-white/[0.04] dark:text-white dark:hover:bg-white/[0.07]";
 
   return (
-    <div className="flex gap-3 flex-wrap">
-      <button onClick={exportJSON}>Export</button>
+    <>
+      <div className="flex flex-wrap items-center gap-1.5">
+        <button onClick={() => setModalMode("export")} className={buttonClass}>
+          <Download size={16} />
+          <span className="hidden sm:inline">Export</span>
+        </button>
 
-      <button onClick={importJSON}>Import</button>
+        <button onClick={() => setModalMode("import")} className={buttonClass}>
+          <Upload size={16} />
+          <span className="hidden sm:inline">Import</span>
+        </button>
 
-      <button onClick={savePreset}>Save Preset</button>
+        <button onClick={savePreset} className={buttonClass}>
+          <Save size={16} />
+          <span className="hidden sm:inline">Save</span>
+        </button>
 
-      <button onClick={undo}>Undo</button>
+        <button onClick={undo} className={buttonClass}>
+          <Undo2 size={16} />
+          <span className="hidden sm:inline">Undo</span>
+        </button>
 
-      <button onClick={redo}>Redo</button>
+        <button onClick={redo} className={buttonClass}>
+          <Redo2 size={16} />
+          <span className="hidden sm:inline">Redo</span>
+        </button>
 
-      <button onClick={clearQuery}>Clear</button>
+        <button onClick={clearQuery} className={buttonClass}>
+          <Trash2 size={16} />
+          <span className="hidden sm:inline">Clear</span>
+        </button>
+      </div>
 
-      <select onChange={(e) => loadPreset(Number(e.target.value))}>
-        <option>Presets</option>
-
-        {presets.map((_, index) => (
-          <option key={index} value={index}>
-            Preset {index + 1}
-          </option>
-        ))}
-      </select>
-    </div>
+      <QueryJsonModal
+        mode={modalMode ?? "export"}
+        open={modalMode !== null}
+        onClose={() => setModalMode(null)}
+      />
+    </>
   );
 }

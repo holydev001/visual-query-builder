@@ -1,33 +1,19 @@
-import QueryBuilder from "../../components/query-builder/QueryBuilder";
+import Navbar from "../../components/landing/Navbar";
+import Hero from "../../components/landing/Hero";
+import Features from "../../components/landing/Feautures";
+import BackgroundShapes from "../../components/landing/BackgroundShapes";
+import HowItWorks from "../../components/landing/HowItWorks";
+import Footer from "../../components/landing/Footer";
 
-import QueryPreview from "../../components/query-preview/QueryPreview";
-
-import QueryResults from "../../components/query-results/QueryResults";
-
-import QueryControls from "../../components/query-controls/QueryControls";
-
-import History from "../../components/query-controls/History";
-
-import KeyboardShortcuts from "../../components/query-controls/KeyboardShortcuts";
-
-import ValidationPanel from "@/components/query-controls/ValidationPanel";
-
-export default function Home() {
+export default function LandingPage() {
   return (
-    <div className="p-8 space-y-10">
-      <QueryControls />
-
-      <ValidationPanel />
-
-      <History />
-
-      <KeyboardShortcuts />
-
-      <QueryBuilder />
-
-      <QueryPreview />
-
-      <QueryResults />
-    </div>
+    <main className="relative min-h-screen overflow-hidden bg-[#f8faf8] text-[#06110d] transition-colors duration-500 dark:bg-[#020807] dark:text-white">
+      <BackgroundShapes />
+      <Navbar />
+      <Hero />
+      <Features />
+      <HowItWorks />
+      <Footer />
+    </main>
   );
 }
