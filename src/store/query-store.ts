@@ -1,100 +1,95 @@
 import { create } from "zustand";
-
+import { persist } from "zustand/middleware";
 import { GroupNode } from "../types/query";
-
 import { createGroup } from "../lib/helpers/queryFactory";
 
 interface QueryStore {
   root: GroupNode;
-
   history: GroupNode[];
-
+  future: GroupNode[];
   presets: GroupNode[];
 
   setRoot: (root: GroupNode) => void;
-
   updateRoot: (updater: (root: GroupNode) => GroupNode) => void;
 
-  savePreset: () => void;
-
-  loadPreset: (index: number) => void;
-
+  undo: () => void;
+  redo: () => void;
   clearQuery: () => void;
 
-  future: GroupNode[];
-
-  undo: () => void;
-
-  redo: () => void;
+  savePreset: () => void;
+  loadPreset: (index: number) => void;
 }
 
-export const useQueryStore = create<QueryStore>((set, get) => ({
-  root: createGroup(),
-
-  history: [],
-
-  presets: [],
-
-  future: [],
-
-  setRoot: (root) => {
-    set((state) => ({
-      root,
-      history: [...state.history.slice(-9), structuredClone(root)],
+export const useQueryStore = create<QueryStore>()(
+  persist(
+    (set, get) => ({
+      root: createGroup(),
+      history: [],
       future: [],
-    }));
-  },
+      presets: [],
 
-  updateRoot: (updater) => {
-    const next = updater(get().root);
+      setRoot: (root) => {
+        set((state) => ({
+          root,
+          history: [...state.history.slice(-19), structuredClone(root)],
+          future: [],
+        }));
+      },
 
-    get().setRoot(next);
-  },
+      updateRoot: (updater) => {
+        const next = updater(get().root);
+        get().setRoot(next);
+      },
 
-  savePreset: () => {
-    set((state) => ({
-      presets: [...state.presets, structuredClone(state.root)],
-    }));
-  },
+      undo: () => {
+        const history = get().history;
 
-  loadPreset: (index) => {
-    const preset = get().presets[index];
+        if (history.length < 2) return;
 
-    if (preset) {
-      get().setRoot(structuredClone(preset));
+        const current = history[history.length - 1];
+        const previous = history[history.length - 2];
+
+        set({
+          root: structuredClone(previous),
+          history: history.slice(0, -1),
+          future: [structuredClone(current), ...get().future],
+        });
+      },
+
+      redo: () => {
+        const future = get().future;
+
+        if (future.length === 0) return;
+
+        const next = future[0];
+
+        set({
+          root: structuredClone(next),
+          history: [...get().history, structuredClone(next)],
+          future: future.slice(1),
+        });
+      },
+
+      clearQuery: () => {
+        get().setRoot(createGroup());
+      },
+
+      savePreset: () => {
+        set((state) => ({
+          presets: [...state.presets, structuredClone(state.root)],
+        }));
+      },
+
+      loadPreset: (index) => {
+        const preset = get().presets[index];
+
+        if (!preset) return;
+
+        get().setRoot(structuredClone(preset));
+      },
+    }),
+    {
+      name: "visual-query-builder-storage",
     }
-  },
-
-  clearQuery: () => {
-    get().setRoot(createGroup());
-  },
-
-  undo: () => {
-    const history = get().history;
-
-    if (history.length < 2) return;
-
-    const current = history[history.length - 1];
-    const previous = history[history.length - 2];
-
-    set({
-      root: structuredClone(previous),
-      history: history.slice(0, -1),
-      future: [structuredClone(current), ...get().future],
-    });
-  },
-
-  redo: () => {
-    const future = get().future;
-
-    if (future.length === 0) return;
-
-    const next = future[0];
-
-    set({
-      root: structuredClone(next),
-      history: [...get().history, structuredClone(next)],
-      future: future.slice(1),
-    });
-  },
-}));
+  )
+);
