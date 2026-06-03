@@ -9,6 +9,16 @@ import { useQueryStore } from "../../src/store/query-store";
 import { updateNode } from "../../src/lib/traversal/updateNode";
 import { removeNode } from "../../src/lib/traversal/removeNode";
 
+import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
+
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+
+import SortableNode from "./SortableNode";
+import { reorderChildren } from "../../src/lib/traversal/reorderNode";
+
 interface Props {
   node: GroupType;
 }
@@ -24,6 +34,14 @@ export default function GroupNode({ node }: Props) {
         children: [...group.children, createCondition()],
       })),
     );
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) return;
+
+    setRoot(reorderChildren(root, node.id, String(active.id), String(over.id)));
   }
 
   function toggleCollapse() {
@@ -88,14 +106,33 @@ border-neutral-700
       </div>
 
       {!node.collapsed && (
-        <div className="space-y-3 mt-4">
-          {node.children.map((child) => {
-            if (child.type === "group") {
-              return <GroupNode key={child.id} node={child} />;
-            }
-            return <ConditionNode key={child.id} node={child} />;
-          })}
-        </div>
+        <DndContext
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={node.children.map((child) => child.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-3 mt-4">
+              {node.children.map((child) => {
+                if (child.type === "group") {
+                  return (
+                    <SortableNode key={child.id} id={child.id}>
+                      <GroupNode node={child} />
+                    </SortableNode>
+                  );
+                }
+
+                return (
+                  <SortableNode key={child.id} id={child.id}>
+                    <ConditionNode node={child} />
+                  </SortableNode>
+                );
+              })}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
     </div>
   );
