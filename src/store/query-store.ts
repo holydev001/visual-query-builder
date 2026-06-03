@@ -7,18 +7,51 @@ import { createGroup } from "../lib/helpers/queryFactory";
 interface QueryStore {
   root: GroupNode;
 
+  history: GroupNode[];
+
+  presets: GroupNode[];
+
   setRoot: (root: GroupNode) => void;
 
   updateRoot: (updater: (root: GroupNode) => GroupNode) => void;
+
+  savePreset: () => void;
+
+  loadPreset: (index: number) => void;
 }
 
-export const useQueryStore = create<QueryStore>((set) => ({
+export const useQueryStore = create<QueryStore>((set, get) => ({
   root: createGroup(),
 
-  setRoot: (root) => set({ root }),
+  history: [],
 
-  updateRoot: (updater) =>
+  presets: [],
+
+  setRoot: (root) => {
     set((state) => ({
-      root: updater(state.root),
-    })),
+      root,
+
+      history: [...state.history.slice(-9), structuredClone(root)],
+    }));
+  },
+
+  updateRoot: (updater) => {
+    const next = updater(get().root);
+
+    get().setRoot(next);
+  },
+
+  savePreset: () => {
+    set((state) => ({
+      presets: [...state.presets, structuredClone(state.root)],
+    }));
+  },
+
+  loadPreset: (index) => {
+    const preset = get().presets[index];
+
+    if (preset) {
+      get().setRoot(structuredClone(preset));
+    }
+  },
 }));
