@@ -18,6 +18,14 @@ interface QueryStore {
   savePreset: () => void;
 
   loadPreset: (index: number) => void;
+
+  clearQuery: () => void;
+
+  future: GroupNode[];
+
+  undo: () => void;
+
+  redo: () => void;
 }
 
 export const useQueryStore = create<QueryStore>((set, get) => ({
@@ -27,11 +35,13 @@ export const useQueryStore = create<QueryStore>((set, get) => ({
 
   presets: [],
 
+  future: [],
+
   setRoot: (root) => {
     set((state) => ({
       root,
-
       history: [...state.history.slice(-9), structuredClone(root)],
+      future: [],
     }));
   },
 
@@ -53,5 +63,38 @@ export const useQueryStore = create<QueryStore>((set, get) => ({
     if (preset) {
       get().setRoot(structuredClone(preset));
     }
+  },
+
+  clearQuery: () => {
+    get().setRoot(createGroup());
+  },
+
+  undo: () => {
+    const history = get().history;
+
+    if (history.length < 2) return;
+
+    const current = history[history.length - 1];
+    const previous = history[history.length - 2];
+
+    set({
+      root: structuredClone(previous),
+      history: history.slice(0, -1),
+      future: [structuredClone(current), ...get().future],
+    });
+  },
+
+  redo: () => {
+    const future = get().future;
+
+    if (future.length === 0) return;
+
+    const next = future[0];
+
+    set({
+      root: structuredClone(next),
+      history: [...get().history, structuredClone(next)],
+      future: future.slice(1),
+    });
   },
 }));
